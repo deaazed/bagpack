@@ -119,6 +119,7 @@ const AppNavigator = () => {
             color: '#2D3748',
           },
           cardStyle: { backgroundColor: '#F7FAFC' },
+          headerShown: true,
         }}
       >
         <MainStack.Screen 

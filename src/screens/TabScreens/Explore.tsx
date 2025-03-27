@@ -7,11 +7,13 @@ import {
   TouchableOpacity, 
   Image, 
   TextInput, 
-  FlatList 
+  FlatList,
+  Modal
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ExploreScreenNavigationProp } from '../../navigation/types';
 import { Card } from '../../components';
+import AIChatAgent from '../../components/AIChatAgent';
 
 // Données fictives pour les destinations populaires
 const popularDestinations = [
@@ -100,10 +102,16 @@ const recommendedExperiences = [
 
 const Explore = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [showAIChat, setShowAIChat] = useState(false);
   const navigation = useNavigation<ExploreScreenNavigationProp>();
   
   const handleDestinationPress = (destination: string) => {
     navigation.navigate('DestinationInfo', { destination });
+  };
+
+  const handleAIDestinationSelect = (destination: string) => {
+    setSearchQuery(destination);
+    setShowAIChat(false);
   };
   
   const renderDestinationItem = ({ item }: any) => (
@@ -157,21 +165,54 @@ const Explore = () => {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
-        <Text style={styles.welcomeText}>Bonjour 👋</Text>
-        <Text style={styles.subtitle}>Où souhaitez-vous aller ?</Text>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={styles.welcomeText}>Bonjour 👋</Text>
+            <Text style={styles.subtitle}>Où souhaitez-vous aller ?</Text>
+          </View>
+          <TouchableOpacity style={styles.notificationButton}>
+            <Text style={styles.notificationIcon}>🔔</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       
       <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Rechercher une destination..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        <TouchableOpacity style={styles.searchButton}>
-          <Text style={styles.searchButtonText}>🔍</Text>
+        <View style={styles.searchInputContainer}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Rechercher une destination..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+        <TouchableOpacity 
+          style={styles.aiButton}
+          onPress={() => setShowAIChat(true)}
+        >
+          <Text style={styles.aiButtonText}>Planifier avec l'IA</Text>
+          <Text style={styles.aiIcon}>🤖</Text>
         </TouchableOpacity>
       </View>
+
+      <Modal
+        visible={showAIChat}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Assistant IA</Text>
+            <TouchableOpacity 
+              onPress={() => setShowAIChat(false)}
+              style={styles.closeButton}
+            >
+              <Text style={styles.closeButtonText}>✕</Text>
+            </TouchableOpacity>
+          </View>
+          <AIChatAgent onDestinationSelect={handleAIDestinationSelect} />
+        </View>
+      </Modal>
       
       <View style={styles.categoriesSection}>
         <Text style={styles.sectionTitle}>Catégories</Text>
@@ -232,6 +273,11 @@ const styles = StyleSheet.create({
     marginTop: 60,
     marginBottom: 24,
   },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
   welcomeText: {
     fontSize: 24,
     fontWeight: '700',
@@ -245,26 +291,45 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     marginBottom: 24,
+    gap: 12,
+  },
+  searchInputContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    overflow: 'hidden',
+  },
+  searchIcon: {
+    fontSize: 18,
+    marginRight: 8,
+    color: '#718096',
   },
   searchInput: {
     flex: 1,
     paddingVertical: 12,
-    paddingHorizontal: 16,
     fontSize: 16,
     color: '#2D3748',
   },
-  searchButton: {
-    paddingHorizontal: 16,
-    justifyContent: 'center',
+  aiButton: {
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#5A67D8',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 8,
   },
-  searchButtonText: {
-    fontSize: 20,
+  aiButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  aiIcon: {
+    fontSize: 16,
   },
   categoriesSection: {
     marginBottom: 24,
@@ -412,6 +477,40 @@ const styles = StyleSheet.create({
   experienceRatingIcon: {
     fontSize: 14,
     color: '#F6AD55',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#F7FAFC',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#2D3748',
+  },
+  closeButton: {
+    padding: 8,
+  },
+  closeButtonText: {
+    fontSize: 20,
+    color: '#718096',
+  },
+  notificationButton: {
+    padding: 8,
+    backgroundColor: 'transparent',
+    borderRadius: 20,
+  },
+  notificationIcon: {
+    fontSize: 20,
+    color: '#718096',
   },
 });
 
